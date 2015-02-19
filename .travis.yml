@@ -9,4 +9,4 @@ branches:
     - /^release-.*$/
     - /^hotfix-.*$/
 
-script: "cd jsonrpc-java/ && mvn clean install"
+script: "cd jsonrpc-java/ && gradle clean test"
