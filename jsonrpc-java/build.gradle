@@ -1,0 +1,33 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.6
+group = 'dk.au.cs'
+version = '1.1'
+
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'JsonRpc Android Tcp',
+                   'Implementation-Version': version
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.slf4j:slf4j-api:1.7.10'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'org.testng:testng:6.8.21'
+    compile 'org.easymock:easymock:3.3.1'
+    compile 'org.easymock:easymockclassextension:3.2'
+    testCompile 'junit:junit:4.12'
+}
+
+test {
+    // enable TestNG support (default is JUnit)
+    useTestNG()
+}
