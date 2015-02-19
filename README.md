@@ -153,24 +153,9 @@ In case of remote exception it throws an _Error_
 * [Gson 1.4](http://code.google.com/p/google-gson/)
 * [SLF4J 1.5.8](http://www.slf4j.org/)
 
-### Maven
-```xml
-<dependencies>
-   <dependency>
-      <groupId>org.json.rpc</groupId>
-      <artifactId>jsonrpc</artifactId>
-      <version>1.1</version>
-   </dependency>
-</dependencies>
+### Gradle/Maven
 
-<repositories>
-   <repository>
-      <id>ritwik-mvn-repo</id>
-      <url>http://ritwik.net/mvn/releases/</url>
-   </repository>
-</repositories>
-```
-Note: classifier = server/client can be used to include only specific implementations.
+Look at the mvn-repo branch on this repository
 
 ## Logging
 JSON-RPC uses SLF4J for logging, so you will have to include specific implementation based on your requirement
