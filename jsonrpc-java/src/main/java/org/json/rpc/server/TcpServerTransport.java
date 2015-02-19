@@ -32,10 +32,10 @@ public class TcpServerTransport implements JsonRpcServerTransport {
 
     private Socket clientSocket;
 
-    public TcpServerTransport(){
+    public TcpServerTransport(int port){
         ServerSocket serverSocket = null;
         try {
-            serverSocket = new ServerSocket(5578);
+            serverSocket = new ServerSocket(port);
             clientSocket = serverSocket.accept();
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,13 +45,13 @@ public class TcpServerTransport implements JsonRpcServerTransport {
     }
 
     public String readRequest() throws Exception {
-
         InputStream in = clientSocket.getInputStream();
 
+        
         byte[] reqLenBytes = new byte[4];
         if (in.read(reqLenBytes) != 4) throw new RuntimeException("Unable to read the request");
 
-        int reqLen = ByteBuffer.allocate(4).put(reqLenBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+        int reqLen = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(reqLenBytes).getInt(0);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
@@ -67,9 +67,10 @@ public class TcpServerTransport implements JsonRpcServerTransport {
     }
 
     public void writeResponse(String responseData) throws Exception {
+
         byte[] data = responseData.getBytes();
 
-        byte[] lenBytes = ByteBuffer.allocate(4).putInt(data.length).order(ByteOrder.LITTLE_ENDIAN).array();
+        byte[] lenBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(data.length).array();
 
         OutputStream out = clientSocket.getOutputStream();
         out.write(lenBytes);

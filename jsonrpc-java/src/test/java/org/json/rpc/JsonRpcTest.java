@@ -19,9 +19,11 @@ package org.json.rpc;
 import org.json.rpc.client.HttpJsonRpcClientTransport;
 import org.json.rpc.client.JsonRpcClientTransport;
 import org.json.rpc.client.JsonRpcInvoker;
+import org.json.rpc.client.TcpRpcClientTransport;
 import org.json.rpc.commons.RpcIntroSpection;
 import org.json.rpc.server.JsonRpcExecutor;
 import org.json.rpc.server.JsonRpcServerTransport;
+import org.json.rpc.server.TcpServerTransport;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -92,6 +94,28 @@ public class JsonRpcTest {
 
         JsonRpcInvoker invoker = new JsonRpcInvoker();
 
+        RpcIntroSpection system = invoker.get(transport, "system", RpcIntroSpection.class);
+        System.out.println(Arrays.toString(system.listMethods()));
+    }
+
+
+    @Test
+    public void testRemoteTcp() throws Exception {
+
+        final JsonRpcExecutor executor = new JsonRpcExecutor();
+        //executor.addHandler("system", executor, RpcIntroSpection.class);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                executor.execute(new TcpServerTransport(5578));
+            }
+        });
+        t.start();
+        Thread.sleep(500);
+
+        String url = "http://127.0.0.1:5578";
+        TcpRpcClientTransport transport = new TcpRpcClientTransport(new URL(url));
+        JsonRpcInvoker invoker = new JsonRpcInvoker();
         RpcIntroSpection system = invoker.get(transport, "system", RpcIntroSpection.class);
         System.out.println(Arrays.toString(system.listMethods()));
     }
