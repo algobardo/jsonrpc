@@ -39,7 +39,7 @@ test {
 // Usage: gradle upload generate an artifact in build/repo, that artifact need to be pushed to the mvn-repo branch
 uploadArchives {
     repositories.mavenDeployer {
-        repository(url: "file:///$buildDir/repo")
+        repository(url: "file:///$buildDir/../../repo")
     }
 }
 
