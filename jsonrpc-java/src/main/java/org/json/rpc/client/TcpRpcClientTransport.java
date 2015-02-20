@@ -48,7 +48,7 @@ public class TcpRpcClientTransport implements JsonRpcClientTransport {
             out = kkSocket.getOutputStream();
         }
         catch(Exception e) {
-            throw new RuntimeException("Error connecting to the server, check permission and server status");
+            throw new RuntimeException("Error connecting to the server, check permission and server status", e);
         }
 
     }
