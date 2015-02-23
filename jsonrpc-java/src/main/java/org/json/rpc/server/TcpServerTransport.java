@@ -39,7 +39,7 @@ public class TcpServerTransport implements JsonRpcServerTransport {
             clientSocket = serverSocket.accept();
         } catch (IOException e) {
             e.printStackTrace();
-            throw new RuntimeException("Unable to create the server");
+            throw new RuntimeException("Unable to create the server", e);
         }
 
     }
@@ -49,14 +49,22 @@ public class TcpServerTransport implements JsonRpcServerTransport {
 
         
         byte[] reqLenBytes = new byte[4];
-        if (in.read(reqLenBytes) != 4) throw new RuntimeException("Unable to read the request");
+
+        int n;
+        int lenRemaining = reqLenBytes.length;
+        int i = 0;
+        while(lenRemaining > 0 && ((n = in.read(reqLenBytes, i, lenRemaining)) > 0)) {
+            System.out.println("Read " + n);
+            i += n;
+            lenRemaining -= n;
+        }
+        if(lenRemaining != 0) throw new RuntimeException("Error with the remote request");
 
         int reqLen = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(reqLenBytes).getInt(0);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         byte[] buff = new byte[BUFF_LENGTH];
-        int n;
         int remaining = reqLen;
         while (remaining > 0 && (n = in.read(buff, 0, Math.min(remaining, buff.length))) > 0) {
             remaining -= n;

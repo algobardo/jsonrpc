@@ -66,12 +66,20 @@ public class TcpRpcClientTransport implements JsonRpcClientTransport {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         byte[] resLenBytes = new byte[4];
-        if(in.read(resLenBytes) != 4) throw new RuntimeException("Error with the remote request");
+        int n;
+        int lenRemaining = resLenBytes.length;
+        int i = 0;
+        while(lenRemaining > 0 && ((n = in.read(resLenBytes, i, lenRemaining)) > 0)) {
+            i += n;
+            lenRemaining -= n;
+        }
+        if(lenRemaining != 0) throw new RuntimeException("Error with the remote request");
+        
         int resLen = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(resLenBytes).getInt(0);
 
         in = new BufferedInputStream(in);
         byte[] buff = new byte[1024];
-        int n;
+        
         int remaining = resLen;
         while (remaining > 0 && ((n = in.read(buff,0,Math.min(remaining, buff.length))) > 0) ) {
             bos.write(buff, 0, n);
