@@ -40,14 +40,6 @@ public class TcpRpcClientTransport implements JsonRpcClientTransport {
 
     public TcpRpcClientTransport(URL url) {
         this.url = url;
-        /*try {
-            Socket kkSocket = new Socket(url.getHost(),url.getPort());
-            in = kkSocket.getInputStream();
-            out = kkSocket.getOutputStream();
-        }
-        catch(Exception e) {
-            throw new RuntimeException("Error connecting to the server, check permission and server status", e);
-        }*/
     }
 
     public String call(String data) throws IOException {
@@ -99,8 +91,5 @@ public class TcpRpcClientTransport implements JsonRpcClientTransport {
         }
 
         return bos.toString();
-    }
-
-    public void close() {
     }
 }
