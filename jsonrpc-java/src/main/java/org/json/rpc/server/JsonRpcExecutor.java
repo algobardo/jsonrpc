@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import java.net.SocketTimeoutException;
 
 public final class JsonRpcExecutor implements RpcIntroSpection {
 
@@ -116,14 +116,19 @@ public final class JsonRpcExecutor implements RpcIntroSpection {
         String errorData = null;
 
         JsonObject req = null;
+
+        String requestData = null;
         try {
-            String requestData = transport.readRequest();
+            requestData = transport.readRequest();
             LOG.debug("JSON-RPC >>  {}", requestData);
             JsonParser parser = new JsonParser();
             req = (JsonObject) parser.parse(new StringReader(requestData));
+        } catch (SocketTimeoutException e) {
+            // To avoid accepting threads locks
+            return;
         } catch (Throwable t) {
             errorCode = JsonRpcErrorCodes.PARSE_ERROR_CODE;
-            errorMessage = "unable to parse json-rpc request";
+            errorMessage = "unable to parse json-rpc request (data: " + requestData + ")";
             errorData = getStackTrace(t);
 
             LOG.warn(errorMessage, t);
@@ -131,7 +136,6 @@ public final class JsonRpcExecutor implements RpcIntroSpection {
             sendError(transport, resp, errorCode, errorMessage, errorData);
             return;
         }
-
 
         try {
             assert req != null;

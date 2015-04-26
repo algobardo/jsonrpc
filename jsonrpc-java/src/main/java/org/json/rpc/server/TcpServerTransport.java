@@ -30,24 +30,25 @@ public class TcpServerTransport implements JsonRpcServerTransport {
 
     private static final int BUFF_LENGTH = 1024;
 
-    private Socket clientSocket;
+    private ServerSocket serverSocket = null;
+    private Socket clientSocket = null;
 
     public TcpServerTransport(int port){
-        ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(port);
-            clientSocket = serverSocket.accept();
+
+            // Set a 1 second timeout, such that threads that accept connections wont be blocked for good
+            serverSocket.setSoTimeout(1000);
         } catch (IOException e) {
-            e.printStackTrace();
             throw new RuntimeException("Unable to create the server", e);
         }
-
     }
 
     public String readRequest() throws Exception {
+        clientSocket = serverSocket.accept();
+
         InputStream in = clientSocket.getInputStream();
 
-        
         byte[] reqLenBytes = new byte[4];
 
         int n;
@@ -58,7 +59,7 @@ public class TcpServerTransport implements JsonRpcServerTransport {
             i += n;
             lenRemaining -= n;
         }
-        if(lenRemaining != 0) throw new RuntimeException("Error with the remote request");
+        if (lenRemaining != 0) throw new RuntimeException("Error with the remote request: lenRemaining=" + lenRemaining);
 
         int reqLen = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).put(reqLenBytes).getInt(0);
 
@@ -75,14 +76,30 @@ public class TcpServerTransport implements JsonRpcServerTransport {
     }
 
     public void writeResponse(String responseData) throws Exception {
-
         byte[] data = responseData.getBytes();
-
         byte[] lenBytes = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(data.length).array();
 
         OutputStream out = clientSocket.getOutputStream();
         out.write(lenBytes);
         out.write(data);
         out.flush();
+    }
+
+    public void closeClient() {
+        if (clientSocket != null) {
+            try {
+                clientSocket.close();
+            } catch (Exception e) {}
+            clientSocket = null;
+        }
+    }
+
+    public void closeServer() {
+        if (serverSocket != null) {
+            try {
+                serverSocket.close();
+            } catch (Exception e) {}
+            serverSocket = null;
+        }
     }
 }

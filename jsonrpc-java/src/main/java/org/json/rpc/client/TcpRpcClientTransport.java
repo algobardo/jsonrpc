@@ -37,32 +37,32 @@ import java.util.zip.GZIPInputStream;
 public class TcpRpcClientTransport implements JsonRpcClientTransport {
 
     private URL url;
-    private InputStream in;
-    private OutputStream out;
 
     public TcpRpcClientTransport(URL url) {
         this.url = url;
-        try {
+        /*try {
             Socket kkSocket = new Socket(url.getHost(),url.getPort());
             in = kkSocket.getInputStream();
             out = kkSocket.getOutputStream();
         }
         catch(Exception e) {
             throw new RuntimeException("Error connecting to the server, check permission and server status", e);
-        }
-
+        }*/
     }
 
-    public String call(String data)
-            throws IOException {
+    public String call(String data) throws IOException {
+        Socket socket = new Socket(url.getHost(),url.getPort());
 
-        
+        InputStream in = socket.getInputStream();
+        OutputStream out = socket.getOutputStream();
+
         byte[] outData = data.getBytes();
         byte[] dataLen = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(outData.length).array();
 
         out.write(dataLen);
         out.write(outData);
         out.flush();
+
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
         byte[] resLenBytes = new byte[4];
@@ -88,6 +88,19 @@ public class TcpRpcClientTransport implements JsonRpcClientTransport {
         bos.flush();
         bos.close();
 
+        try {
+            in.close();
+        } catch (Exception e) {
+        }
+
+        try {
+            out.close();
+        } catch (Exception e) {
+        }
+
         return bos.toString();
+    }
+
+    public void close() {
     }
 }
